@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
 import { Text } from '@/components/Themed';
 import { getVisualNovelData } from '@/API/VN';
-import { VNResponseType } from '@/Definitions/VNType';
+import type { VNResponseType } from '@/Definitions/VNType';
 import VNCoverCarousel from '@/components/Carousels/VNCoverCarousel';
 
-export default function HomeTab() {
+export default function HomeScreen() {
   const [vnDataRating, setVnDataRating] = useState<VNResponseType | null>(null);
   const [loadingRating, setLoadingRating] = useState(true);
 

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View } from "../../Themed";
 import { StyleSheet } from "react-native";
 
-import { VNDataType } from "@/Definitions/VNType";
+import type { VNDataType } from "@/Definitions/VNType";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import VNViewBodyGeneral from "./(tabs)/VNViewBodyGeneral";
 import VNViewBodyReleases from "./(tabs)/VNViewBodyReleases";

@@ -6,14 +6,14 @@ import Animated, {
   useScrollViewOffset,
   useAnimatedStyle,
   interpolate,
-  AnimatedRef,
+  type AnimatedRef,
 } from "react-native-reanimated";
 import { Dimensions, StyleSheet, Pressable } from "react-native";
 import ButtonsRow from "./Parts/ButtonsRow";
 
-import { VNDataType } from "@/Definitions/VNType";
+import type { VNDataType } from "@/Definitions/VNType";
 import HeaderButtons from "./Parts/HeaderButtons";
-import { AnimatedScrollView } from "react-native-reanimated/lib/typescript/reanimated2/component/ScrollView";
+import type { AnimatedScrollView } from "react-native-reanimated/lib/typescript/reanimated2/component/ScrollView";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 475;

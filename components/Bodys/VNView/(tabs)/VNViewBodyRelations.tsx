@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text } from "../../../Themed";
 import { StyleSheet } from "react-native";
 
-import { VNDataType } from "@/Definitions/VNType";
+import type { VNDataType } from "@/Definitions/VNType";
 
 export default function VNViewBodyRelations({ vnData }: { vnData: VNDataType }) {
   return (

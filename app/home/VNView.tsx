@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 import { getVisualNovelData } from "@/API/VN";
-import { VNResponseType } from "@/Definitions/VNType";
 import { useLocalSearchParams } from "expo-router";
 import VNViewHeader from "@/components/Headers/VNView/VNViewHeader";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import VNViewBody from "@/components/Bodys/VNView/VNViewBody";
+import type { VNResponseType } from "@/Definitions/VNType";
 
 export default function VNView() {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -43,7 +43,8 @@ export default function VNView() {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        vnData && (
+        vnData &&
+        vnData.results[0] && (
           <>
             <VNViewHeader vnData={vnData.results[0]} scrollRef={scrollRef} />
             <VNViewBody vnData={vnData.results[0]} />
