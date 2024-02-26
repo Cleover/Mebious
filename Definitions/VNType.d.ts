@@ -1,5 +1,4 @@
 export interface VNResponseType {
-  image: any
   results: VNDataType[],
   more: boolean
 }
