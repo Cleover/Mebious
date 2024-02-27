@@ -1,5 +1,5 @@
 export interface APIType {
-    filters?: string[],
+    filters?: any[],
     fields: string
     sort?: string
     reverse?: boolean

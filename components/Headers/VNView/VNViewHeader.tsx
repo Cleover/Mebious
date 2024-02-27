@@ -1,7 +1,6 @@
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import Stars from "@/components/Headers/VNView/Parts/Stars";
-import { Text, View } from "../../Themed";
+import { Text, View, getTheme } from "@/components/Themed";
 import Animated, {
   useScrollViewOffset,
   useAnimatedStyle,
@@ -9,11 +8,16 @@ import Animated, {
   type AnimatedRef,
 } from "react-native-reanimated";
 import { Dimensions, StyleSheet, Pressable } from "react-native";
+
+import HeaderButtons from "./Parts/HeaderButtons";
+import Stars from "./Parts/Stars";
+import Title from "./Parts/Title";
 import ButtonsRow from "./Parts/ButtonsRow";
 
 import type { VNDataType } from "@/Definitions/VNType";
-import HeaderButtons from "./Parts/HeaderButtons";
 import type { AnimatedScrollView } from "react-native-reanimated/lib/typescript/reanimated2/component/ScrollView";
+
+import hexToRGBA from "@/Functions/HexToRGBA";
 
 const { width } = Dimensions.get("window");
 const IMG_HEIGHT = 475;
@@ -58,6 +62,8 @@ export default function VNViewHeader({
     };
   });
 
+  const THEME = getTheme();
+
   return (
     <View>
       <Animated.Image
@@ -66,28 +72,32 @@ export default function VNViewHeader({
       />
       <LinearGradient
         colors={[
-          "rgba(6, 16, 28, 0)",
-          "rgba(6, 16, 28, 0.7)",
-          "rgba(6, 16, 28, 1)",
+          "rgba(0, 0, 0, 0)",
+          hexToRGBA(THEME.backgroundColor, 0.7),
+          THEME.backgroundColor,
         ]}
         style={styles.gradient}
       />
       <Animated.View style={[styles.topContainer, topContainerAnimatedStyle]}>
-        <HeaderButtons length_minutes={vnData.length_minutes ?? 0} />
+        <HeaderButtons
+          length_minutes={vnData.length_minutes ?? 0}
+          length_votes={vnData.length_votes ?? 0}
+        />
       </Animated.View>
-      <View style={styles.bottomContainer}>
-        <Stars rating={vnData?.rating ?? 0} />
-        <View style={[styles.row, styles.verticalPadding5]}>
-          <Text
-            adjustsFontSizeToFit
-            numberOfLines={2}
-            style={[styles.title, styles.bold]}
-          >
-            {vnData.title}
-          </Text>
+      <View
+        style={[styles.bottomContainer, { backgroundColor: "transparent" }]}
+      >
+        <Stars
+          rating={vnData?.rating ?? 0}
+          votecount={vnData?.votecount ?? 0}
+        />
+        <View
+          style={[styles.verticalPadding5, { backgroundColor: "transparent" }]}
+        >
+          <Title title={vnData.title ?? ""} aliases={vnData.aliases ?? []} />
         </View>
 
-        <View style={styles.row}>
+        <View style={[styles.row, { backgroundColor: "transparent" }]}>
           {vnData.developers?.map((developer, index) => (
             <React.Fragment key={index}>
               {index !== 0 && (
@@ -131,31 +141,22 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     position: "absolute",
-    backgroundColor: "transparent",
   },
   bottomContainer: {
     position: "absolute",
     bottom: 10,
     paddingHorizontal: 20,
-    backgroundColor: "transparent",
     width: "100%",
     marginBottom: -20,
-  },
-  title: {
-    fontSize: 30,
   },
   developers: {
     fontSize: 13,
     fontWeight: "300",
   },
-  bold: {
-    fontWeight: "bold",
-  },
   row: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    backgroundColor: "transparent",
   },
   verticalPadding5: {
     paddingVertical: 5,

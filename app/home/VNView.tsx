@@ -6,6 +6,7 @@ import VNViewHeader from "@/components/Headers/VNView/VNViewHeader";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 import VNViewBody from "@/components/Bodys/VNView/VNViewBody";
 import type { VNResponseType } from "@/Definitions/VNType";
+import { getTheme } from "@/components/Themed";
 
 export default function VNView() {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -33,11 +34,13 @@ export default function VNView() {
       });
   }, []);
 
+  const THEME = getTheme();
+
   return (
     <Animated.ScrollView
       ref={scrollRef}
       scrollEventThrottle={10}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: THEME.backgroundColor }]}
       showsVerticalScrollIndicator={false}
     >
       {loading ? (
@@ -58,7 +61,6 @@ export default function VNView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#06101C",
   },
 });
 

@@ -1,43 +1,57 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { Text, View, getTheme } from "@/components/Themed";
+
 import { Ionicons } from "@expo/vector-icons";
 
 export default function ButtonsRow() {
+  const THEME = getTheme();
+
   return (
-    <View style={[styles.row, styles.paddingVertical15]}>
-      <View style={styles.box} >
+    <View
+      style={[
+        styles.row,
+        styles.paddingVertical15,
+        { backgroundColor: "transparent" },
+      ]}
+    >
+      <View style={[styles.box, THEME.option.secondary]}>
         <Ionicons
           size={30}
           name="chatbox-outline"
-          color="white"
+          color={THEME.option.secondary.color}
           style={styles.boxIcon}
         />
       </View>
-      <View style={styles.box}>
+      <View style={[styles.box, THEME.option.secondary]}>
         <Ionicons
           size={30}
           name="star-outline"
-          color="white"
+          color={THEME.option.secondary.color}
           style={styles.boxIcon}
         />
       </View>
-      <View style={styles.box}>
+      <View style={[styles.box, THEME.option.secondary]}>
         <Ionicons
           size={30}
           name="ellipsis-horizontal"
-          color="white"
+          color={THEME.option.secondary.color}
           style={styles.boxIcon}
         />
       </View>
-      <View style={styles.longBox}>
-        <View style={styles.longBoxRow}>
+      <View style={[styles.longBox, THEME.option.primary]}>
+        <View style={[styles.longBoxRow, { backgroundColor: "transparent" }]}>
           <Ionicons
             size={20}
             name="pencil"
-            color="white"
+            color={THEME.option.primary.color}
             style={styles.boxIcon}
           />
-          <Text style={styles.longBoxText}>Playing</Text>
+          <Text
+            style={[styles.longBoxText, { color: THEME.option.primary.color }]}
+          >
+            Playing
+          </Text>
         </View>
       </View>
     </View>
@@ -49,7 +63,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
   },
   box: {
-    backgroundColor: "rgb(0, 163, 131)",
     borderRadius: 15,
     padding: 10,
     width: 50,
@@ -58,7 +71,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   longBox: {
-    backgroundColor: "rgb(36, 100, 123)",
     borderRadius: 15,
     padding: 10,
     height: 50,
@@ -67,7 +79,6 @@ const styles = StyleSheet.create({
   },
   longBoxText: {
     paddingLeft: 10,
-    color: "white",
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",

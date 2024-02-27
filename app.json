@@ -20,6 +20,7 @@
       "bundleIdentifier": "com.cleopatra.Mebious"
     },
     "android": {
+      "package": "com.cleopatra.Mebious",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#06101C"

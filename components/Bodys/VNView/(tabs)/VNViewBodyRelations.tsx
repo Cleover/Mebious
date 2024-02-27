@@ -15,7 +15,6 @@ export default function VNViewBodyRelations({ vnData }: { vnData: VNDataType }) 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 20,
-    backgroundColor: "transparent",
     width: "100%",
   },
 });

@@ -1,21 +1,29 @@
 import React from "react";
-import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
+import { ScrollView, StyleSheet, Pressable } from "react-native";
+import { Text, View, getTheme } from "@/components/Themed";
+
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
+import type { VNDataType } from "@/Definitions/VNType";
+
+import hexToRGBA from "@/Functions/HexToRGBA";
 
 const blurhash = "L9D]L^0MIT?Y}3J:?as7~Uo|W,s+";
 
-export default function VNCoverCarousel({
+export default function CoverCarousel({
   vnsData,
   height,
 }: {
-  vnsData: any[];
+  vnsData: VNDataType[];
   height: number;
 }) {
   const coverWidth = (2 / 3) * height;
+
+  const THEME = getTheme();
+
   return (
-    <View style={[styles.body, { height }]}>
+    <View style={{ height }}>
       <ScrollView
         horizontal={true}
         contentContainerStyle={{
@@ -36,16 +44,16 @@ export default function VNCoverCarousel({
             <Pressable>
               <Image
                 style={styles.image}
-                source={vnData.image?.url}
+                source={vnData.image?.url ?? ""}
                 placeholder={blurhash}
                 contentFit="cover"
                 transition={1000}
               />
               <LinearGradient
                 colors={[
-                  "rgba(9, 20, 34, 0)",
-                  "rgba(9, 20, 34, 0.8)",
-                  "rgba(9, 20, 34, 1)",
+                  "rgba(0, 0, 0, 0)",
+                  hexToRGBA(THEME.backgroundColor, 0.8),
+                  THEME.backgroundColor,
                 ]}
                 style={styles.gradient}
               />
@@ -65,9 +73,6 @@ export default function VNCoverCarousel({
 }
 
 const styles = StyleSheet.create({
-  body: {
-    backgroundColor: "transparent",
-  },
   cover: {
     position: "relative",
     marginBottom: 20,
@@ -77,7 +82,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 15,
     width: "100%",
-    backgroundColor: "transparent",
   },
   gradient: {
     position: "absolute",
@@ -90,7 +94,6 @@ const styles = StyleSheet.create({
   text: {
     position: "absolute",
     bottom: 10,
-    color: "white",
     fontSize: 20,
     fontWeight: "bold",
     paddingHorizontal: 10,

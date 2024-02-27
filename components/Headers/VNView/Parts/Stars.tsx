@@ -1,10 +1,22 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { Text, View, getTheme } from "@/components/Themed";
+
 import { Ionicons } from "@expo/vector-icons";
 
-export default function Stars({ rating }: { rating: number }) {
+import * as DropdownMenu from "zeego/dropdown-menu";
+
+export default function Stars({
+  rating,
+  votecount,
+}: {
+  rating: number;
+  votecount: number;
+}) {
   const fullStars = Math.floor(rating / 20);
   const halfStar = Math.floor((rating % 20) / 10);
+
+  const THEME = getTheme();
 
   const renderStars = () => {
     return Array.from({ length: 5 }).map((_, index) => (
@@ -18,15 +30,26 @@ export default function Stars({ rating }: { rating: number }) {
             : "star-outline"
         }
         key={index}
-        color={"white"}
+        color={THEME.color}
       />
     ));
   };
 
   return (
-    <View style={styles.container}>
-      {renderStars()}
-      <Text style={styles.text}>({(rating / 10).toFixed(2)})</Text>
+    <View style={[styles.row, {backgroundColor: "transparent"}]}>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <View style={[styles.container, {backgroundColor: "transparent"}]}>
+            {renderStars()}
+            <Text style={styles.text}>({(rating / 10).toFixed(2)})</Text>
+          </View>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item key="content" disabled={true}>
+            {`From ${votecount.toLocaleString()} votes`}
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     </View>
   );
 }
@@ -34,13 +57,16 @@ export default function Stars({ rating }: { rating: number }) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",    
+    alignItems: "center",
   },
   text: {
     marginTop: 2,
     paddingLeft: 5,
     fontWeight: "bold",
     fontSize: 17,
-    color: "white",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });

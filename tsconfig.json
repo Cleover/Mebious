@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node18-strictest-esm/tsconfig.json",
+  "extends": [ "@tsconfig/bun/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
   "compilerOptions": {
     "strict": true,
     "jsx": "react",
