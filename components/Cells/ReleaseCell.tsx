@@ -8,6 +8,8 @@ import hexToRGBA from "@/Functions/HexToRGBA";
 
 import { SvgUri } from "react-native-svg";
 
+import getSVGSize from "@/constants/SVGTable";
+
 export default function ReleaseCell({
   releaseData,
 }: {
@@ -28,11 +30,19 @@ export default function ReleaseCell({
             <Text style={[styles.title, styles.bold]}>{releaseData.title}</Text>
           </View>
           <View style={[styles.rowRight, { backgroundColor: "transparent" }]}>
-            {/* <SvgUri
-              width="15"
-              height="22.5"
-              uri={`https://raw.githubusercontent.com/Cleover/Mebious/main/.github/VNDB/Platform/${"mac"}.svg`}
-            /> */}
+            {releaseData.platforms?.map((platform, index) => (
+              <View
+                style={[{ paddingLeft: 3 }, { backgroundColor: "transparent" }]}
+                key={index}
+              >
+                <SvgUri
+                  key={index}
+                  width={getSVGSize(platform)?.x ?? 0}
+                  height={getSVGSize(platform)?.y ?? 0}
+                  uri={`https://raw.githubusercontent.com/Cleover/Mebious/main/.github/VNDB/Platform/${platform}.svg`}
+                />
+              </View>
+            ))}
           </View>
         </View>
       </View>

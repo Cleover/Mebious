@@ -22,7 +22,6 @@ export default function VNViewBody({ vnData }: { vnData: VNDataType }) {
     filters: ["vn", "=", ["id", "=", vnData.id]],
     fields: ReleasesFields,
     results: 100,
-
   };
 
   useEffect(() => {
@@ -52,6 +51,7 @@ export default function VNViewBody({ vnData }: { vnData: VNDataType }) {
           fontStyle={{ color: THEME.color }}
         />
       </View>
+
       {selectedIndex == 0 ? (
         <VNViewBodyGeneral vnData={vnData} />
       ) : selectedIndex == 1 ? (

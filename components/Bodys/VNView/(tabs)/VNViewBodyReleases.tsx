@@ -36,7 +36,9 @@ export default function VNViewBodyReleases({
         <View key={groupKey} style={[styles.ph20]}>
           <View style={[styles.row, styles.pt20]}>
             <View style={styles.titleContainer}>
-              <Text style={[styles.title, styles.bold]}>{getLanguageName(groupKey)}</Text>
+              <Text style={[styles.title, styles.bold]}>
+                {getLanguageName(groupKey)}
+              </Text>
             </View>
             <View style={[styles.buttonsContainer]}>
               <Pressable
@@ -59,8 +61,8 @@ export default function VNViewBodyReleases({
           </View>
 
           {toggledReleases[groupKey] &&
-            groupedData[groupKey]!.map((release) => (
-              <ReleaseCell key={release.id} releaseData={release} />
+            groupedData[groupKey]!.map((release, index) => (
+              <ReleaseCell key={index} releaseData={release} />
             ))}
         </View>
       ))}
