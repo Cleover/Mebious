@@ -4,9 +4,7 @@
 
 
 <h1 align="center">Mebious</h1>
-<h6 align="center">A VNDB Client For iOS / Android</h6>
-
-#
+<p align="center">A VNDB Client For iOS / Android</p>
 
 <p align="center">
     <img width=256 height=auto src="./.github/assets/home.png"></img>
