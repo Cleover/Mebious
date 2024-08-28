@@ -1,16 +1,20 @@
 {
-  "extends": "expo/tsconfig.base",
+  "extends": [
+    "@tsconfig/bun/tsconfig.json",
+    "@tsconfig/strictest/tsconfig.json"
+  ],
   "compilerOptions": {
     "strict": true,
+    "jsx": "react",
+    "verbatimModuleSyntax": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.d.ts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
