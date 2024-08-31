@@ -1,15 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
-import { getVisualNovelData } from "@/API/VN";
-import type { VNDataType, VNResponseType } from "@/Definitions/VNType";
-import { getTheme } from "@/components/Themed";
-import { Text, View } from "@/components/Themed";
+import React, { useState } from "react";
+import { Pressable } from "react-native";
+
+import * as DropdownMenu from "zeego/dropdown-menu";
+
+import { View, Background, Box, Text, Icon } from "@/components/Themed";
 import CoverMasonry from "@/components/Masonry/CoverMasonry";
 import SearchBar from "@/components/Inputs/SearchBar";
-import { Ionicons } from "@expo/vector-icons";
-import hexToRGBA from "@/Functions/HexToRGBA";
-import * as DropdownMenu from "zeego/dropdown-menu";
+import TopGradient from "@/components/Gradients/TopGradient";
+
 import { notifyNotImplemented } from "@/Functions/NotifyPopup";
+import { useFetchVisualNovelData } from "@/Functions/FetchUtils";
+
+import { CoverVNFields } from "@/constants/Fields";
+
+import type { VNDataType } from "@/Definitions/VNType";
+import type { APIType } from "@/Definitions/APIType";
 
 type SortOption = {
   name: string;
@@ -76,120 +81,61 @@ const sortOptions: SortOption[] = [
   },
 ];
 
-// "Highest Rated", "Release Date", "4 Rows"
-
 const DEFAULT_SORT = 1;
 
+const defaultApiOptions = {
+  filters: [],
+  fields: CoverVNFields,
+  sort: "votecount",
+  reverse: true,
+  results: 100,
+};
+
 export default function SearchScreen() {
-  const [query, setQuery] = useState("");
   const [columnSelection, setColumnSelection] = useState(1);
-
-  const [vnData, setVnData] = useState<VNResponseType | null>(null);
-  const [defaultVnData, setDefaultVnData] = useState<VNResponseType | null>(
-    null
-  );
-
-  const [loadingSearch, setLoadingSearch] = useState(true);
-
   const [selectedSort, setSelectedSort] = useState(DEFAULT_SORT);
 
-  const searchFilter = ["search", "=", query];
+  const [apiOptions, setApiOptions] = useState<APIType>(defaultApiOptions);
 
-  const apiOptions = {
-    filters: searchFilter ? searchFilter : [],
-    fields: VNFields,
-    sort: sortOptions[selectedSort]?.value || "votecount",
-    reverse: sortOptions[selectedSort]?.reverse || false,
-    results: 100,
-  };
+  let vnData = useFetchVisualNovelData(apiOptions);
 
   const search = (newQuery: string) => {
-    setQuery(newQuery);
-    if (newQuery == "") {
-      setSelectedSort(DEFAULT_SORT);
-    } else {
-      setSelectedSort(0);
-      setLoadingSearch(true);
+    const filters = newQuery.length > 0 ? ["search", "=", newQuery] : [];
+    const sort = newQuery.length > 0 ? 0 : DEFAULT_SORT;
+
+    if (JSON.stringify(filters) != JSON.stringify(apiOptions.filters)) {
+      setSelectedSort(sort);
+
+      setApiOptions((prevState) => ({
+        ...prevState,
+        filters,
+        sort: sortOptions[sort]?.value ?? "votecount",
+        reverse: sortOptions[sort]?.reverse ?? true,
+      }));
     }
   };
 
-  const fetchVNData = () => {
-    getVisualNovelData(apiOptions, false)
-      .then((data: VNResponseType) => {
-        setVnData(data);
-        setLoadingSearch(false);
-        if (!defaultVnData) {
-          setDefaultVnData(data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoadingSearch(false);
-      });
-  };
-
-  useEffect(() => {
-    if (loadingSearch == true) {
-      fetchVNData();
-    }
-  }, [loadingSearch]);
-
-  const THEME = getTheme();
-
-  const setTopBarOpacity = (opacity: number) => {
-    (window as any).setTopBarOpacity(opacity);
-  };
-
-  const dataToShow: VNDataType[] =
-    vnData && defaultVnData
-      ? loadingSearch
-        ? []
-        : query == ""
-        ? selectedSort == DEFAULT_SORT
-          ? defaultVnData.results
-          : vnData.results
-        : vnData.results
-      : [];
+  const dataToShow: VNDataType[] = vnData.data?.results ?? [];
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: THEME.backgroundColor }]}
-    >
+    <Background>
       <CoverMasonry
         vnsData={dataToShow}
-        setTopBarOpacity={setTopBarOpacity}
         columnCount={columnSelection + 1}
         header={
-          <View>
-            <View style={[styles.row, styles.gap13, styles.pb13]}>
-              <View
-                style={[
-                  {
-                    backgroundColor: hexToRGBA(THEME.backgroundColor, 0.8),
-                    borderColor: hexToRGBA(
-                      THEME.option.primary.backgroundColor,
-                      0.8
-                    ),
-                    overflow: "hidden",
-                  },
-                  styles.outline,
-                  styles.grow,
-                ]}
-              >
+          <View className="gap-4">
+            <View className="flex-row justify-between items-center gap-4">
+              <View className="flex-grow border rounded-full p-1">
                 <SearchBar submitted={search} />
               </View>
 
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
-                  <View style={[styles.box, THEME.option.secondary]}>
-                    <Ionicons
-                      size={30}
-                      name="cog-outline"
-                      color={THEME.option.secondary.color}
-                      style={styles.boxIcon}
-                    />
-                  </View>
+                  <Box className="rounded-2xl p-2.5">
+                    <Icon size={30} name="cog-outline" />
+                  </Box>
                 </DropdownMenu.Trigger>
+                {/* @ts-expect-error TS2740 */}
                 <DropdownMenu.Content>
                   <DropdownMenu.Group>
                     {columnOptions.map((option, index) => (
@@ -210,75 +156,28 @@ export default function SearchScreen() {
               </DropdownMenu.Root>
             </View>
 
-            <View
-              style={[
-                styles.row,
-                styles.spaceBetween,
-                styles.gap13,
-                styles.pb13,
-              ]}
-            >
-              <Pressable
-                style={{ opacity: 0.5 }}
-                onPress={notifyNotImplemented}
-              >
-                <View
-                  style={[
-                    styles.row,
-                    styles.box,
-                    styles.gap6half,
-                    styles.ph13,
-                    { width: "auto" },
-                    THEME.option.secondary,
-                  ]}
-                >
-                  <Ionicons
-                    size={20}
-                    name="filter"
-                    color={THEME.option.secondary.color}
-                    style={styles.boxIcon}
-                  />
-                  <Text style={styles.buttonText}>Filters</Text>
-                </View>
+            <View className="flex-row justify-between items-center gap-4">
+              <Pressable className="opacity-50" onPress={notifyNotImplemented}>
+                <Box className="flex-row items-center rounded-full gap-2 py-3 px-4">
+                  <Icon size={20} name="filter" className="text-center" />
+                  <Text className="text-lg font-medium">Filters</Text>
+                </Box>
               </Pressable>
 
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
-                  <View
-                    style={[
-                      {
-                        backgroundColor: hexToRGBA(THEME.backgroundColor, 0.8),
-                        borderColor: hexToRGBA(
-                          THEME.option.primary.backgroundColor,
-                          0.8
-                        ),
-                        overflow: "hidden",
-                      },
-                      styles.outline,
-                      { justifyContent: "center", height: 45 },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.row,
-                        styles.spaceBetween,
-                        styles.gap6half,
-                        styles.ph13,
-                        { width: 200 },
-                      ]}
-                    >
-                      <Text style={styles.buttonText}>
-                        {sortOptions[selectedSort]?.name}
-                      </Text>
-                      <Ionicons
-                        size={20}
-                        name="chevron-down"
-                        color={THEME.option.secondary.color}
-                        style={styles.boxIcon}
-                      />
-                    </View>
+                  <View className="flex-row items-center justify-between border rounded-full w-56 py-3 px-4">
+                    <Text className="text-lg font-medium">
+                      {sortOptions[selectedSort]?.name}
+                    </Text>
+                    <Icon
+                      size={20}
+                      name="chevron-down"
+                      className="text-center"
+                    />
                   </View>
                 </DropdownMenu.Trigger>
+                {/* @ts-expect-error TS2740 */}
                 <DropdownMenu.Content>
                   <DropdownMenu.Group>
                     {sortOptions.map((option, index) => (
@@ -286,13 +185,17 @@ export default function SearchScreen() {
                         key={index.toString()}
                         onSelect={() => {
                           setSelectedSort(index);
-
-                          if (!(index == DEFAULT_SORT && query == "")) {
-                            setLoadingSearch(true);
-                          }
+                          setApiOptions((prevState) => ({
+                            ...prevState,
+                            sort: sortOptions[index]?.value ?? "votecount",
+                            reverse: sortOptions[index]?.reverse ?? true,
+                          }));
                         }}
                         disabled={index === selectedSort}
-                        hidden={option.requireQuery && query == ""}
+                        hidden={
+                          option.requireQuery &&
+                          (apiOptions.filters ?? []).length === 0
+                        }
                       >
                         {option.name}
                       </DropdownMenu.Item>
@@ -306,63 +209,16 @@ export default function SearchScreen() {
         footer={
           <View>
             {dataToShow.length >= 100 && (
-              <Text style={{paddingTop: 13, alignSelf: "center"}}>Currently only the first 100 results are shown.</Text>
+              <Text className="self-center">
+                Currently only the first 100 results are shown.
+              </Text>
             )}
           </View>
         }
         extraHeaderTopPadding={50}
         extraFooterBottomPadding={90}
       />
-    </View>
+      <TopGradient />
+    </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { 
-    flex: 1,
-  },
-  pb13: {
-    paddingBottom: 13,
-  },
-  outline: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 3,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  gap13: {
-    gap: 13,
-  },
-  gap6half: {
-    gap: 6.5,
-  },
-  ph13: {
-    paddingHorizontal: 13,
-  },
-  grow: {
-    flexGrow: 1,
-  },
-  box: {
-    borderRadius: 20,
-    height: 45,
-    width: 45,
-    justifyContent: "center",
-  },
-  boxIcon: {
-    textAlign: "center",
-  },
-  buttonText: {
-    fontWeight: "500",
-    fontSize: 16,
-  },
-  spaceBetween: {
-    justifyContent: "space-between",
-  },
-});
-
-const VNFields = ["title", "image.url", "image.sexual", "image.violence"].join(
-  ","
-);

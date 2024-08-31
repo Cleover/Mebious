@@ -44,6 +44,7 @@ export default function Stars({
             <Text style={styles.text}>({(rating / 10).toFixed(2)})</Text>
           </View>
         </DropdownMenu.Trigger>
+        {/* @ts-expect-error TS2740 */}
         <DropdownMenu.Content>
           <DropdownMenu.Item key="content" disabled={true}>
             {`From ${votecount.toLocaleString()} votes`}

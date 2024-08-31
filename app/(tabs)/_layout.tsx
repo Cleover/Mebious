@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
+import { Platform, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { BlurView } from "expo-blur";
-
-import { getSchemaData } from "@/API/Schema";
-import type { SchemaType } from "@/Definitions/SchemaType";
-import { Platform, StyleSheet } from "react-native";
 
 import "react-native-reanimated";
 
 import MainNavbar from "@/components/Navbars/MainNavbar";
 import { View } from "@/components/Themed";
+
+import { getSchemaData } from "@/API/Schema";
+
+import type { SchemaType } from "@/Definitions/SchemaType";
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>["name"];
@@ -22,7 +23,7 @@ function TabBarIcon(props: {
   if (focused) {
     rest.name = props.focusedIcon || props.name;
   }
-  return <Ionicons size={28} style={{}} color={color} {...rest} />;
+  return <Ionicons size={28} color={color} {...rest} />;
 }
 
 export default function TabLayout() {
@@ -89,12 +90,10 @@ export default function TabLayout() {
           <BlurView
             tint="dark"
             intensity={100}
+            className="rounded-t-3xl overflow-hidden"
             style={[
               StyleSheet.absoluteFill,
               {
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                overflow: "hidden",
                 backgroundColor: `rgba(18, 17, 19, ${
                   Platform.OS == "ios" ? "0.5" : "1"
                 } )`,

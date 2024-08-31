@@ -105,6 +105,7 @@ export default function ScreenshotCarousel({
                   />
                 </View>
               </DropdownMenu.Trigger>
+              {/* @ts-expect-error TS2740 */}
               <DropdownMenu.Content>
                 {keysArray.map((releaseName, index) => (
                   <DropdownMenu.Item

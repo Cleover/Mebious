@@ -25,6 +25,7 @@ export default function Title({
             </Text>
           </View>
         </DropdownMenu.Trigger>
+        {/* @ts-expect-error TS2740 */}
         <DropdownMenu.Content>
           {aliases.map((alias) => (
             <DropdownMenu.Item key={alias} disabled={true}>

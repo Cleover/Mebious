@@ -27,14 +27,8 @@ export default function ButtonsRow({ vnID }: { vnID: string }) {
   };
 
   return (
-    <View
-      style={[
-        styles.row,
-        styles.pv13,
-        { gap: 7 },
-      ]}
-    >
-      <Pressable style={{opacity: 0.5}} onPress={notifyNotImplemented}>
+    <View style={[styles.row, styles.pv13, { gap: 7 }]}>
+      <Pressable style={{ opacity: 0.5 }} onPress={notifyNotImplemented}>
         <View style={[styles.box, THEME.option.secondary]}>
           <Ionicons
             size={28}
@@ -44,7 +38,7 @@ export default function ButtonsRow({ vnID }: { vnID: string }) {
           />
         </View>
       </Pressable>
-      <Pressable style={{opacity: 0.5}}onPress={notifyNotImplemented}>
+      <Pressable style={{ opacity: 0.5 }} onPress={notifyNotImplemented}>
         <View style={[styles.box, THEME.option.secondary]}>
           <Ionicons
             size={28}
@@ -54,7 +48,7 @@ export default function ButtonsRow({ vnID }: { vnID: string }) {
           />
         </View>
       </Pressable>
-      <Pressable style={{opacity: 0.5}} onPress={notifyNotImplemented}>
+      <Pressable style={{ opacity: 0.5 }} onPress={notifyNotImplemented}>
         <View style={[styles.box, THEME.option.secondary]}>
           <Ionicons
             size={28}
@@ -64,7 +58,10 @@ export default function ButtonsRow({ vnID }: { vnID: string }) {
           />
         </View>
       </Pressable>
-      <Pressable style={[styles.longBox, THEME.option.primary, {opacity: 0.5}]} onPress={notifyNotImplemented}>
+      <Pressable
+        style={[styles.longBox, THEME.option.primary, { opacity: 0.5 }]}
+        onPress={notifyNotImplemented}
+      >
         <View>
           <View style={styles.longBoxRow}>
             <Ionicons
@@ -96,6 +93,7 @@ export default function ButtonsRow({ vnID }: { vnID: string }) {
             />
           </View>
         </DropdownMenu.Trigger>
+        {/* @ts-expect-error TS2740 */}
         <DropdownMenu.Content>
           <DropdownMenu.Item key={"copy"} onSelect={copyURL}>
             Copy URL

@@ -1,17 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, getTheme } from "../../../components/Themed";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet } from "react-native";
-import BackNavbar from "@/components/Navbars/BackNavbar";
-import ReleaseList from "@/components/Lists/ReleaseList";
-import { getReleasesData } from "@/API/Releases";
-import type {
-  ReleaseDataType,
-  ReleaseResponseType,
-} from "@/Definitions/ReleaseType";
-import type { SchemaType } from "@/Definitions/SchemaType";
+
 import * as DropdownMenu from "zeego/dropdown-menu";
-import { Ionicons } from "@expo/vector-icons";
+
+import { Background, Box, Icon } from "@/components/Themed";
+import BackNavbar from "@/components/Navbars/BackNavbar";
+import SubViewHeader from "@/components/Headers/SubViewHeader";
+import ReleaseList from "@/components/Lists/ReleaseList";
+
+
+import { useFetchReleaseData } from "@/Functions/FetchUtils";
+
+import { FullReleaseFields } from "@/constants/Fields";
+
+import type { ReleaseDataType } from "@/Definitions/ReleaseType";
+import type { SchemaType } from "@/Definitions/SchemaType";
 
 const sorts: {
   id: string;
@@ -46,40 +49,26 @@ const sorts: {
 ];
 
 export default function Releases() {
-  const params = useLocalSearchParams();
-  const { vnID } = params;
-
   const [opacity, setOpacity] = useState<number>(1);
-
-  const THEME = getTheme();
-
   const [filters, setFilters] = useState({
     languages: [] as string[],
     platforms: [] as string[],
   });
   const [sort, setSort] = useState<string>("released");
 
-  const [releasesData, setReleasesData] = useState<ReleaseResponseType | null>(
-    null
-  );
-
   const [renderedData, setRenderedData] = useState<ReleaseDataType[]>([]);
 
-  const apiOptions = {
-    filters: ["vn", "=", ["id", "=", vnID]],
-    fields: ReleasesFields,
-    results: 100,
-  };
+  const { vnID } = useLocalSearchParams();
 
-  useEffect(() => {
-    getReleasesData(apiOptions, true)
-      .then((data: ReleaseResponseType) => {
-        setReleasesData(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }, []);
+  const apiOptions = useMemo(() => {
+    return {
+      filters: ["vn", "=", ["id", "=", vnID]],
+      fields: FullReleaseFields,
+      results: 100,
+    };
+  }, [vnID]);
+
+  const releasesData = useFetchReleaseData(apiOptions);
 
   const sortedReleasesData = useMemo(() => {
     let selectedSort = sorts.find((sortItem) => sortItem.id === sort);
@@ -91,15 +80,17 @@ export default function Releases() {
         reverse: true,
       };
 
-    return [...(releasesData ? releasesData.results : [])].sort((a, b) => {
-      if (a[selectedSort.value] == null) return 1;
-      if (b[selectedSort.value] == null) return -1;
-      return selectedSort.reverse
-        ? // @ts-ignore
-          b[selectedSort.value].localeCompare(a[selectedSort.value])
-        : // @ts-ignore
-          a[selectedSort.value].localeCompare(b[selectedSort.value]);
-    });
+    return [...(releasesData.data ? releasesData.data.results : [])].sort(
+      (a, b) => {
+        if (a[selectedSort.value] == null) return 1;
+        if (b[selectedSort.value] == null) return -1;
+        return selectedSort.reverse
+          ? // @ts-ignore
+            b[selectedSort.value].localeCompare(a[selectedSort.value])
+          : // @ts-ignore
+            a[selectedSort.value].localeCompare(b[selectedSort.value]);
+      }
+    );
   }, [releasesData, sort]);
 
   useEffect(() => {
@@ -143,7 +134,7 @@ export default function Releases() {
 
   const supportedLangsSorted = useMemo(
     () =>
-      generateSortedMap(releasesData ? releasesData.results : [], (release) =>
+      generateSortedMap(releasesData.data?.results ?? [], (release) =>
         (release.languages ?? []).map((lang) => lang.lang)
       ),
     [releasesData]
@@ -152,7 +143,7 @@ export default function Releases() {
   const supportedPlatformsSorted = useMemo(
     () =>
       generateSortedMap(
-        releasesData ? releasesData.results : [],
+        releasesData.data?.results ?? [],
         (release) => release.platforms ?? []
       ),
     [releasesData]
@@ -172,52 +163,44 @@ export default function Releases() {
     list: typeof languages | typeof platforms
   ) => {
     return (
-      <DropdownMenu.Content>
-        <DropdownMenu.Group>
-          {Array.from(supportedMap).map(([item, key]) => (
-            <DropdownMenu.Item
-              key={item}
-              onSelect={() => {
-                switchState(type, item);
-              }}
-            >
-              {`${filters[type].includes(item) ? "✓ " : "    "} ${getLabel(
-                list,
-                item
-              )} (${key})`}
-            </DropdownMenu.Item>
-          ))}
-        </DropdownMenu.Group>
-      </DropdownMenu.Content>
+      <>
+        {/* @ts-expect-error TS2740 */}
+        <DropdownMenu.Content>
+          <DropdownMenu.Group>
+            {Array.from(supportedMap).map(([item, key]) => (
+              <DropdownMenu.Item
+                key={item}
+                onSelect={() => {
+                  switchState(type, item);
+                }}
+              >
+                {`${filters[type].includes(item) ? "✓ " : "    "} ${getLabel(
+                  list,
+                  item
+                )} (${key})`}
+              </DropdownMenu.Item>
+            ))}
+          </DropdownMenu.Group>
+        </DropdownMenu.Content>
+      </>
     );
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: THEME.backgroundColor }]}
-    >
+    <Background>
       <ReleaseList
-        releasesData={renderedData || []}
+        releasesData={renderedData}
         setTopBarOpacity={setOpacity}
         header={
-          <View>
-            <View style={[styles.row, styles.pb13]}>
-              <View style={styles.titleContainer}>
-                <View style={[styles.row, { alignItems: "flex-start" }]}>
-                  <Text style={[styles.title, styles.bold]}>Releases</Text>
-                </View>
-              </View>
-              <View style={[styles.buttonsContainer]}>
+          <SubViewHeader
+            title="Releases"
+            rightSideContent={
+              <>
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>
-                    <View style={[styles.box, THEME.option.primary]}>
-                      <Ionicons
-                        size={20}
-                        name="language"
-                        color={THEME.option.primary.color}
-                        style={styles.boxIcon}
-                      />
-                    </View>
+                    <Box className="rounded-2xl p-2.5">
+                      <Icon size={22} name="language" />
+                    </Box>
                   </DropdownMenu.Trigger>
 
                   {generateDropdown(
@@ -229,14 +212,9 @@ export default function Releases() {
 
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>
-                    <View style={[styles.box, THEME.option.primary]}>
-                      <Ionicons
-                        size={20}
-                        name="game-controller"
-                        color={THEME.option.primary.color}
-                        style={styles.boxIcon}
-                      />
-                    </View>
+                    <Box className="rounded-2xl p-2.5">
+                      <Icon size={22} name="game-controller" />
+                    </Box>
                   </DropdownMenu.Trigger>
                   {generateDropdown(
                     supportedPlatformsSorted,
@@ -247,15 +225,11 @@ export default function Releases() {
 
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger>
-                    <View style={[styles.box, THEME.option.primary]}>
-                      <Ionicons
-                        size={20}
-                        name="options"
-                        color={THEME.option.primary.color}
-                        style={styles.boxIcon}
-                      />
-                    </View>
+                    <Box className="rounded-2xl p-2.5">
+                      <Icon size={22} name="options" />
+                    </Box>
                   </DropdownMenu.Trigger>
+                  {/* @ts-expect-error TS2740 */}
                   <DropdownMenu.Content>
                     <DropdownMenu.Group>
                       {sorts.map((sortItem) => (
@@ -273,104 +247,14 @@ export default function Releases() {
                     </DropdownMenu.Group>
                   </DropdownMenu.Content>
                 </DropdownMenu.Root>
-              </View>
-            </View>
-          </View>
+              </>
+            }
+          />
         }
         extraHeaderTopPadding={50}
       />
 
-      <View
-        style={[
-          styles.top,
-          { opacity, pointerEvents: opacity == 0 ? "none" : "auto" },
-        ]}
-      >
-        <BackNavbar />
-      </View>
-    </View>
+      <BackNavbar opacity={opacity} />
+    </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  top: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  pb13: {
-    paddingBottom: 13,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-  },
-  box: {
-    borderRadius: 15,
-    padding: 10,
-    width: 40,
-    marginLeft: 7,
-    height: 40,
-    justifyContent: "center",
-  },
-  boxIcon: {
-    textAlign: "center",
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-  },
-  showMoreButtonContainer: {
-    paddingVertical: 10,
-    alignItems: "center",
-    borderRadius: 10,
-  },
-  showMoreButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-});
-
-const ReleasesFields = [
-  "id",
-  "title",
-  "alttitle",
-  "languages.lang",
-  "languages.title",
-  "languages.latin",
-  "producers.name",
-  "platforms",
-  "released",
-  "minage",
-  "patch",
-  "official",
-  "voiced",
-  "resolution",
-  "freeware",
-  "uncensored",
-  "has_ero",
-  "notes",
-  "media.medium",
-  "media.qty",
-  "vns.rtype",
-  "vns.title",
-  "vns.developers.name",
-  "gtin",
-  "catalog",
-  "extlinks.url",
-  "extlinks.label",
-].join(",");

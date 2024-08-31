@@ -13,12 +13,12 @@ import { easeGradient } from "react-native-easing-gradient";
 const blurhash = "CEN]Rv-WPn^N}SQ[VFNF";
 
 import { MasonryFlashList } from "@shopify/flash-list";
-import { clamp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { handleScrollOpacity } from "@/Functions/NavbarUtils";
 
 export default function CoverMasonry({
   vnsData,
-  setTopBarOpacity,
+  topBarOverwrite,
 
   columnCount = 2,
 
@@ -29,7 +29,7 @@ export default function CoverMasonry({
   extraFooterBottomPadding = 0,
 }: {
   vnsData: VNDataType[];
-  setTopBarOpacity?: (value: number) => void;
+  topBarOverwrite?: (value: number) => void;
 
   columnCount?: number;
 
@@ -85,20 +85,16 @@ export default function CoverMasonry({
         <MasonryFlashList
           data={vnsData}
           numColumns={columnCount}
-          onScroll={(event) => {
-            if (setTopBarOpacity) {
-              const currentOffset = event.nativeEvent.contentOffset.y;
-              const opacity = clamp(((currentOffset - 100) / 100) * -1, 0, 1);
-              setTopBarOpacity(opacity);
-            }
-          }}
+          onScroll={(event) => handleScrollOpacity(event, topBarOverwrite)}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={header}
           ListHeaderComponentStyle={{
             paddingTop: insets.top + extraHeaderTopPadding,
+            paddingBottom: 13,
           }}
           ListFooterComponent={footer}
           ListFooterComponentStyle={{
+            paddingTop: 13,
             paddingBottom: insets.bottom + extraFooterBottomPadding,
           }}
           renderItem={({ item, index }) => (

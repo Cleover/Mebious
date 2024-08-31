@@ -239,7 +239,6 @@ const styles = StyleSheet.create({
   bottom: {
     position: "absolute",
     bottom: 0,
-    paddingBottom: 13,
     paddingHorizontal: 13,
   },
   rowBetween: {

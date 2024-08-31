@@ -1,28 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { Text, View, getTheme } from "../../../components/Themed";
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, ScrollView } from "react-native";
-import BackNavbar from "@/components/Navbars/BackNavbar";
-import { clamp } from "react-native-reanimated";
-import { getVisualNovelData } from "@/API/VN";
-import type { VNResponseType } from "@/Definitions/VNType";
-import TagsList from "@/components/Tags/TagsList";
-import * as DropdownMenu from "zeego/dropdown-menu";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useMemo, useState } from "react";
+import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
+
+import * as DropdownMenu from "zeego/dropdown-menu";
+
+import { Background, Box, Icon, View } from "@/components/Themed";
+import BackNavbar from "@/components/Navbars/BackNavbar";
+import TagsList from "@/components/Tags/TagsList";
+
+import { useFetchVisualNovelData } from "@/Functions/FetchUtils";
+import { handleScrollOpacity } from "@/Functions/NavbarUtils";
+
+import { FullVNFields } from "@/constants/Fields";
+import SubViewHeader from "@/components/Headers/SubViewHeader";
 
 const spoilerOptions = ["Hide Spoilers", "Minor Spoilers", "Spoil Me!"];
 
 export default function Tags() {
-  const params = useLocalSearchParams();
-  const { vnID } = params;
+  const [opacity, setOpacity] = useState<number>(1);
+
+  const { vnID } = useLocalSearchParams();
 
   const insets = useSafeAreaInsets();
 
-  const [opacity, setOpacity] = useState<number>(1);
+  const apiOptions = useMemo(() => {
+    return {
+      filters: ["id", "=", vnID],
+      fields: FullVNFields,
+    };
+  }, [vnID]);
 
-  const [vnData, setVnData] = useState<VNResponseType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const vnData = useFetchVisualNovelData(apiOptions);
 
   const [state, setState] = useState({
     selectedSpoilerIndex: 0,
@@ -38,12 +47,10 @@ export default function Tags() {
     showingTechnical,
   } = state;
 
-  const tags = vnData?.results[0]?.tags || [];
+  const tags = vnData.data?.results[0]?.tags || [];
 
   const changeSpoiler = (index: number) =>
     setState({ ...state, selectedSpoilerIndex: index });
-
-  const THEME = getTheme();
 
   const noSpoilersCount = tags.filter((tag) => (tag.spoiler || 0) === 0).length;
   const minorSpoilersCount = tags.filter(
@@ -77,100 +84,75 @@ export default function Tags() {
     },
   ];
 
-  const apiOptions = {
-    filters: ["id", "=", vnID as string],
-    fields: VNFields,
-  };
-
-  useEffect(() => {
-    getVisualNovelData(apiOptions, false)
-      .then((data: VNResponseType) => {
-        setVnData(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      });
-  }, []);
-
   return (
-    <View
-      style={[styles.container, { backgroundColor: THEME.backgroundColor }]}
-    >
-      {!loading && vnData?.results[0] && (
+    <Background>
+      {!vnData.loading && vnData.data?.results[0] && (
         <ScrollView
-          onScroll={(event) => {
-            const currentOffset = event.nativeEvent.contentOffset.y;
-
-            const opacity = clamp(((currentOffset - 50) / 50) * -1, 0, 1);
-            setOpacity(opacity);
-          }}
+          onScroll={(event) => handleScrollOpacity(event, setOpacity, 50)}
+          contentContainerStyle={{ paddingTop: 100 }}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={{ paddingTop: 100, paddingBottom: insets.bottom }}>
-            <View style={styles.row}>
-              <Text style={styles.title}>Tags</Text>
+          <View className="px-4 gap-3" style={{ paddingBottom: insets.bottom }}>
+            <SubViewHeader
+              title="Tags"
+              rightSideContent={
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger>
+                    <Box className="rounded-2xl p-2.5">
+                      <Icon size={22} name="ellipsis-horizontal" />
+                    </Box>
+                  </DropdownMenu.Trigger>
+                  {/* @ts-expect-error TS2740 */}
+                  <DropdownMenu.Content>
+                    <DropdownMenu.Group>
+                      {contentGroups.map((group) =>
+                        group.count === 0 ? null : (
+                          <DropdownMenu.Item
+                            key={group.key}
+                            onSelect={() => {
+                              group.toggle();
+                            }}
+                            disabled={group.count === 0}
+                          >
+                            {`    ${group.showing ? "Hide" : "Show"} ${
+                              group.name
+                            } (${group.count})`}
+                          </DropdownMenu.Item>
+                        )
+                      )}
+                    </DropdownMenu.Group>
 
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
-                  <View style={[styles.box, THEME.option.primary]}>
-                    <Ionicons
-                      size={20}
-                      name="ellipsis-horizontal"
-                      color={THEME.option.primary.color}
-                      style={styles.boxIcon}
-                    />
-                  </View>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                  <DropdownMenu.Group>
-                    {contentGroups.map((group) =>
-                      group.count === 0 ? null : (
-                        <DropdownMenu.Item
-                          key={group.key}
-                          onSelect={() => {
-                            group.toggle();
-                          }}
-                          disabled={group.count === 0}
-                        >
-                          {`    ${group.showing ? "Hide" : "Show"} ${
-                            group.name
-                          } (${group.count})`}
-                        </DropdownMenu.Item>
-                      )
-                    )}
-                  </DropdownMenu.Group>
-
-                  <DropdownMenu.Group>
-                    {spoilerOptions.map((option, index) =>
-                      (index === 0
-                        ? noSpoilersCount
-                        : index === 1
-                        ? minorSpoilersCount
-                        : majorSpoilersCount) === 0 ? null : (
-                        <DropdownMenu.Item
-                          key={option}
-                          onSelect={() => {
-                            changeSpoiler(index);
-                          }}
-                          disabled={index === selectedSpoilerIndex}
-                        >
-                          {`${
-                            selectedSpoilerIndex == index ? "✓ " : "    "
-                          } ${option} (+${
-                            index === 0
-                              ? noSpoilersCount
-                              : index === 1
-                              ? minorSpoilersCount
-                              : majorSpoilersCount
-                          })`}
-                        </DropdownMenu.Item>
-                      )
-                    )}
-                  </DropdownMenu.Group>
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            </View>
+                    <DropdownMenu.Group>
+                      {spoilerOptions.map((option, index) =>
+                        (index === 0
+                          ? noSpoilersCount
+                          : index === 1
+                          ? minorSpoilersCount
+                          : majorSpoilersCount) === 0 ? null : (
+                          <DropdownMenu.Item
+                            key={option}
+                            onSelect={() => {
+                              changeSpoiler(index);
+                            }}
+                            disabled={index === selectedSpoilerIndex}
+                          >
+                            {`${
+                              selectedSpoilerIndex == index ? "✓ " : "    "
+                            } ${option} (+${
+                              index === 0
+                                ? noSpoilersCount
+                                : index === 1
+                                ? minorSpoilersCount
+                                : majorSpoilersCount
+                            })`}
+                          </DropdownMenu.Item>
+                        )
+                      )}
+                    </DropdownMenu.Group>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
+              }
+            />
             <TagsList
               showFull={true}
               tags={tags}
@@ -182,58 +164,7 @@ export default function Tags() {
           </View>
         </ScrollView>
       )}
-
-      <View
-        style={[
-          styles.top,
-          { opacity, pointerEvents: opacity == 0 ? "none" : "auto" },
-        ]}
-      >
-        <BackNavbar />
-      </View>
-    </View>
+      <BackNavbar opacity={opacity} />
+    </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 13,
-  },
-  top: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    paddingBottom: 13,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  box: {
-    borderRadius: 15,
-    padding: 10,
-    width: 40,
-    marginLeft: 7,
-    height: 40,
-    justifyContent: "center",
-  },
-  boxIcon: {
-    textAlign: "center",
-  },
-});
-
-const VNFields = [
-  "tags.id",
-  "tags.rating",
-  "tags.name",
-  "tags.spoiler",
-  "tags.category",
-].join(",");

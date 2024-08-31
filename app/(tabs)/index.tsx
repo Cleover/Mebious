@@ -1,240 +1,135 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, ActivityIndicator, Pressable } from "react-native";
-import { getVisualNovelData } from "@/API/VN";
-import type { VNResponseType } from "@/Definitions/VNType";
-import { getTheme } from "@/components/Themed";
-import { View, Text } from "@/components/Themed";
-
-import Animated, { clamp, useAnimatedRef } from "react-native-reanimated";
-import HomeHeader from "@/components/Headers/HomeHeader";
-import { LinearGradient } from "expo-linear-gradient";
-import hexToRGBA from "@/Functions/HexToRGBA";
-import CoverCarousel from "@/components/Carousels/CoverCarousel";
-import { easeGradient } from "react-native-easing-gradient";
+import React from "react";
+import { ActivityIndicator, Pressable } from "react-native";
 import { Link } from "expo-router";
+
+import Animated, { useAnimatedRef } from "react-native-reanimated";
+
+import { Background, Text, View } from "@/components/Themed";
+import CoverCarousel from "@/components/Carousels/CoverCarousel";
+import HomeHeader from "@/components/Headers/HomeHeader";
+import TopGradient from "@/components/Gradients/TopGradient";
+
+import { handleScrollOpacity } from "@/Functions/NavbarUtils";
+import { useFetchVisualNovelData } from "@/Functions/FetchUtils";
+
+import { CoverVNFields } from "@/constants/Fields";
+
+import type { APIType } from "@/Definitions/APIType";
+
+const apiOptionsHeader: APIType = {
+  filters: [
+    "and",
+    ["votecount", ">=", "5000"],
+    ["rating", ">=", "80"],
+    ["release", "=", ["and", ["minage", "<=", "16"]]],
+  ],
+  fields: CoverVNFields,
+  sort: "votecount",
+  reverse: true,
+  results: 100,
+};
+
+const apiOptionsRating: APIType = {
+  filters: [],
+  fields: CoverVNFields,
+  sort: "rating",
+  reverse: true,
+  results: 100,
+};
+
+const apiOptionsVotecount: APIType = {
+  filters: [],
+  fields: CoverVNFields,
+  sort: "votecount",
+  reverse: true,
+  results: 100,
+};
 
 export default function HomeScreen() {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-  const [vnDataHeader, setVnDataHeader] = useState<VNResponseType | null>(null);
-  const [loadingHeader, setLoadingHeader] = useState(true);
+  const headerState = useFetchVisualNovelData(apiOptionsHeader);
+  const ratingState = useFetchVisualNovelData(apiOptionsRating);
+  const votecountState = useFetchVisualNovelData(apiOptionsVotecount);
 
-  const [vnDataRating, setVnDataRating] = useState<VNResponseType | null>(null);
-  const [loadingRating, setLoadingRating] = useState(true);
-
-  const [vnDataVotecount, setVnDataVotecount] = useState<VNResponseType | null>(
-    null
-  );
-  const [loadingVotecount, setLoadingVotecount] = useState(true);
-
-  const apiOptionsHeader = {
-    filters: [
-      "and",
-      ["votecount", ">=", "5000"],
-      ["rating", ">=", "80"],
-      ["release", "=", ["and", ["minage", "<=", "16"]]],
-    ],
-    fields: VNFields,
-    sort: "votecount",
-    reverse: true,
-    results: 10,
-  };
-
-  const apiOptionsRating = {
-    fields: VNFields,
-    sort: "rating",
-    reverse: true,
-    results: 10,
-  };
-
-  const apiOptionsVotecount = {
-    fields: VNFields,
-    sort: "votecount",
-    reverse: true,
-    results: 10,
-  };
-
-  useEffect(() => {
-    getVisualNovelData(apiOptionsHeader, false)
-      .then((data: VNResponseType) => {
-        setVnDataHeader(data);
-        setLoadingHeader(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoadingHeader(false);
-      });
-
-    getVisualNovelData(apiOptionsRating, false)
-      .then((data: VNResponseType) => {
-        setVnDataRating(data);
-        setLoadingRating(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoadingRating(false);
-      });
-
-    getVisualNovelData(apiOptionsVotecount, false)
-      .then((data: VNResponseType) => {
-        setVnDataVotecount(data);
-        setLoadingVotecount(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoadingVotecount(false);
-      });
-  }, []);
-
-  const THEME = getTheme();
-
-  const { colors, locations } = easeGradient({
-    colorStops: {
-      0: {
-        color: hexToRGBA(THEME.backgroundColor, 0.75),
-      },
-      1: {
-        color: "transparent",
-      },
-    },
-  });
+  const isLoading =
+    headerState.loading || ratingState.loading || votecountState.loading;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: THEME.backgroundColor }]}
-    >
+    <Background>
       <Animated.ScrollView
         ref={scrollRef}
         showsVerticalScrollIndicator={false}
-        onScroll={(event) => {
-          const currentOffset = event.nativeEvent.contentOffset.y;
-
-          const opacity = clamp(((currentOffset - 150) / 150) * -1, 0, 1);
-          (window as any).setTopBarOpacity(opacity);
-        }}
+        onScroll={handleScrollOpacity}
       >
-        {loadingRating && loadingVotecount ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
-          vnDataHeader &&
-          vnDataRating &&
-          vnDataVotecount && (
-            <>
-              <HomeHeader
-                vnData={vnDataHeader.results}
-                scrollRef={scrollRef}
-              />
-              <View style={[styles.row, styles.between]}>
-                <Text style={styles.sectionText}>Highest Rated</Text>
-                <View style={styles.row}>
-                  <Link
-                    href={{
-                      pathname: "/home/MoreList",
-                      params: {
-                        headerTitle: "Highest Rated",
-                        fields: VNFields,
-                        sort: "rating",
-                        results: 100,
-                        reverse: "yes",
-                      },
-                    }}
-                    asChild
-                  >
-                    <Pressable style={{ paddingVertical: 10, paddingLeft: 20 }}>
-                      <Text style={styles.viewMore}>{"View More ->"}</Text>
-                    </Pressable>
-                  </Link>
-                </View>
-              </View>
-              <CoverCarousel
-                vnsData={vnDataRating.results.slice(0, 10)}
-                height={240}
-              />
+        <View className="pb-28">
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : (
+            <View className="gap-4">
+              {headerState.data && (
+                <HomeHeader
+                  vnData={headerState.data.results}
+                  scrollRef={scrollRef}
+                />
+              )}
 
-              <View style={[styles.row, styles.between]}>
-                <Text style={styles.sectionText}>Most Votes</Text>
-                <View style={styles.row}>
-                  <Link
-                    href={{
-                      pathname: "/home/MoreList",
-                      params: {
-                        headerTitle: "Most Votes",
-                        fields: VNFields,
-                        sort: "votecount",
-                        results: 100,
-                        reverse: "yes",
-                      },
-                    }}
-                    asChild
-                  >
-                    <Pressable style={{ paddingVertical: 10, paddingLeft: 20 }}>
-                      <Text style={styles.viewMore}>{"View More ->"}</Text>
-                    </Pressable>
-                  </Link>
-                </View>
-              </View>
-              <CoverCarousel
-                vnsData={vnDataVotecount.results.slice(0, 10)}
-                height={240}
-              />
-            </>
-          )
-        )}
-        <View style={{ paddingBottom: 90 }} />
+              {ratingState.data && (
+                <>
+                  <View className="flex-row justify-between items-center px-4">
+                    <Text className="text-2xl font-bold">Highest Rated</Text>
+                    <Link
+                      href={{
+                        pathname: "/home/MoreList",
+                        params: {
+                          headerTitle: "Highest Rated",
+                          apiOptions: JSON.stringify(apiOptionsRating),
+                        },
+                      }}
+                      asChild
+                    >
+                      <Pressable>
+                        <Text className="text-lg">{"View More ->"}</Text>
+                      </Pressable>
+                    </Link>
+                  </View>
+                  <CoverCarousel
+                    vnsData={ratingState.data.results.slice(0, 10)}
+                    height={240}
+                  />
+                </>
+              )}
+
+              {votecountState.data && (
+                <>
+                  <View className="flex-row justify-between items-center px-4">
+                    <Text className="text-2xl font-bold">Most Votes</Text>
+                    <Link
+                      href={{
+                        pathname: "/home/MoreList",
+                        params: {
+                          headerTitle: "Most Votes",
+                          apiOptions: JSON.stringify(apiOptionsVotecount),
+                        },
+                      }}
+                      asChild
+                    >
+                      <Pressable>
+                        <Text className="text-lg">{"View More ->"}</Text>
+                      </Pressable>
+                    </Link>
+                  </View>
+                  <CoverCarousel
+                    vnsData={votecountState.data.results.slice(0, 10)}
+                    height={240}
+                  />
+                </>
+              )}
+            </View>
+          )}
+        </View>
       </Animated.ScrollView>
-      <LinearGradient
-        colors={colors}
-        locations={locations}
-        style={[styles.topGradient, { pointerEvents: "none" }]}
-      />
-    </View>
+      <TopGradient />
+    </Background>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingLeft: 20,
-    fontSize: 30,
-    fontWeight: "bold",
-    paddingVertical: 20,
-  },
-  title: {
-    paddingLeft: 20,
-    fontSize: 25,
-    fontWeight: "bold",
-    paddingVertical: 20,
-  },
-  sectionText: {
-    fontSize: 22,
-    fontWeight: "bold",
-    padding: 13,
-  },
-  topGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: "15%",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  viewMore: {
-    fontSize: 15,
-    paddingRight: 13,
-  },
-  between: {
-    justifyContent: "space-between",
-  },
-  pr13: {
-    paddingRight: 13,
-  },
-});
-
-const VNFields = ["title", "image.url", "image.sexual", "image.violence"].join(
-  ","
-);

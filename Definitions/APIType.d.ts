@@ -3,6 +3,6 @@ export interface APIType {
     fields: string
     sort?: string
     reverse?: boolean
-    results?: number
+    results?: number | string
     page?: number
 }

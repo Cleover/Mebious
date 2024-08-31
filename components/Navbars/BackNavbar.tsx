@@ -1,92 +1,57 @@
 import React from "react";
-import { StyleSheet, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { View, getTheme } from "@/components/Themed";
+import { Icon, View, Text, getTheme } from "@/components/Themed";
 import hexToRGBA from "@/Functions/HexToRGBA";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 
 export default function BackNavbar({
   rightSideContent,
+  opacity = 1,
 }: {
   rightSideContent?: any;
+  opacity?: number;
 }) {
   const insets = useSafeAreaInsets();
 
   const THEME = getTheme();
 
   return (
-    <View style={styles.shadow}>
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <Pressable onPress={() => router.back()}>
-          <BlurView
-            tint="dark"
-            intensity={10}
-            style={[
-              {
-                backgroundColor: hexToRGBA(THEME.backgroundColor, 0.8),
-                borderColor: hexToRGBA(THEME.color, 0.8),
-                shadowColor: hexToRGBA(THEME.color, 0.8),
-                overflow: "hidden",
-              },
-              styles.outline,
-            ]}
-          >
-            <View style={styles.circle}>
-              <Ionicons
-                size={28}
-                name="chevron-back"
-                color={THEME.option.primary.color}
-                style={styles.circleIcon}
-              />
-            </View>
-          </BlurView>
-        </Pressable>
+    <View
+      className="absolute flex-row justify-between items-center px-4"
+      style={[
+        {
+          shadowOffset: {
+            width: 0,
+            height: 0,
+          },
+          shadowOpacity: 0.5,
+          width: "100%",
+          paddingTop: insets.top,
+          opacity: opacity,
+          pointerEvents: opacity == 0 ? "none" : "auto",
+        },
+      ]}
+    >
+      <Pressable onPress={() => router.back()}>
+        <BlurView
+          tint="dark"
+          intensity={10}
+          className="border rounded-full overflow-hidden"
+          style={[
+            {
+              padding: 6,
+              backgroundColor: hexToRGBA(THEME.backgroundColor, 0.8),
+              borderColor: hexToRGBA(THEME.color, 0.8),
+            },
+          ]}
+        >
+          <Icon size={28} name="chevron-back" />
+        </BlurView>
+      </Pressable>
 
-        {rightSideContent}
-      </View>
+      {rightSideContent}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    paddingHorizontal: 13,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-  },
-  outline: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 3,
-
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowRadius: 0,
-  },
-  circle: {
-    borderRadius: 20,
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-  },
-  shadow: {
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowRadius: 4,
-    shadowOpacity: 0.5,
-    shadowColor: "black",
-  },
-  circleIcon: {
-    marginLeft: -2,
-    textAlign: "center",
-  },
-});

@@ -35,14 +35,12 @@ export default function ReleaseList({
         paddingHorizontal: 13,
         height: "100%",
         width: "100%",
-        
       }}
     >
       <View
         style={{
           height: "100%",
           width: "100%",
-
         }}
       >
         <FlashList
@@ -59,9 +57,11 @@ export default function ReleaseList({
           ListHeaderComponent={header}
           ListHeaderComponentStyle={{
             paddingTop: insets.top + extraHeaderTopPadding,
+            paddingBottom: 13,
           }}
           ListFooterComponent={footer}
           ListFooterComponentStyle={{
+            paddingTop: 13,
             paddingBottom: insets.bottom + extraFooterBottomPadding,
           }}
           renderItem={({ item, index }) => (
