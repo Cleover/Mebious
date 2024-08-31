@@ -41,13 +41,15 @@ export default function BackNavbar({
           className="border rounded-full overflow-hidden"
           style={[
             {
-              padding: 6,
+              padding: 4,
               backgroundColor: hexToRGBA(THEME.backgroundColor, 0.8),
               borderColor: hexToRGBA(THEME.color, 0.8),
             },
           ]}
         >
-          <Icon size={28} name="chevron-back" />
+          <View style={{ marginLeft: -1, paddingRight: 1 }}>
+            <Icon size={28} name="chevron-back" />
+          </View>
         </BlurView>
       </Pressable>
 
