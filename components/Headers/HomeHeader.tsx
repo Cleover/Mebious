@@ -148,7 +148,11 @@ export default function HomeHeader({
               <Image
                 style={styles.image}
                 source={{ uri: vnProps.image?.url || "" }}
-                placeholder={blurhash}
+                placeholder={
+                  vnProps.image?.sexual! >= 0.5
+                    ? blurhash
+                    : vnProps.image?.thumbnail ?? blurhash
+                }
                 contentFit="cover"
                 placeholderContentFit="cover"
                 blurRadius={vnProps.image?.sexual! >= 0.5 ? 60 : 0}

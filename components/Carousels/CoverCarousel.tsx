@@ -63,7 +63,11 @@ export default function CoverCarousel({
               <Image
                 style={styles.image}
                 source={vnData.image?.url ?? ""}
-                placeholder={blurhash}
+                placeholder={
+                  vnData.image?.sexual! >= 0.5
+                    ? blurhash
+                    : vnData.image?.thumbnail ?? blurhash
+                }
                 contentFit="cover"
                 placeholderContentFit="cover"
                 blurRadius={vnData.image?.sexual! >= 0.5 ? 100 : 0}
