@@ -1,11 +1,15 @@
 import React, { type ReactElement } from "react";
 import { StyleSheet, Pressable, Dimensions } from "react-native";
+
+import * as DropdownMenu from "zeego/dropdown-menu";
+
 import { Text, View, getTheme } from "@/components/Themed";
 
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { Link } from "expo-router";
-import type { VNDataType } from "@/Definitions/VNType";
+import { Link, router } from "expo-router";
+
+import type { CoverInfo, CoverType } from "@/Definitions/CoverType";
 
 import hexToRGBA from "@/Functions/HexToRGBA";
 import { easeGradient } from "react-native-easing-gradient";
@@ -27,8 +31,12 @@ export default function CoverMasonry({
 
   extraHeaderTopPadding = 0,
   extraFooterBottomPadding = 0,
+
+  renderTitles = true,
+
+  idType = "vn",
 }: {
-  vnsData: VNDataType[];
+  vnsData: CoverType[];
   topBarOverwrite?: (value: number) => void;
 
   columnCount?: number;
@@ -38,6 +46,10 @@ export default function CoverMasonry({
 
   extraHeaderTopPadding?: number;
   extraFooterBottomPadding?: number;
+
+  renderTitles?: boolean;
+
+  idType?: "vn" | "release";
 }) {
   const { width } = Dimensions.get("window");
 
@@ -67,6 +79,13 @@ export default function CoverMasonry({
   });
 
   const insets = useSafeAreaInsets();
+
+  const handleNavigation = (info: CoverInfo) => {
+    router.push({
+      pathname: idType == "release" ? "/home/sub_page/Release" : "/home/VNView",
+      params: idType == "release" ? { rID: info?.id } : { vnID: info?.id },
+    });
+  };
 
   return (
     <View
@@ -98,58 +117,138 @@ export default function CoverMasonry({
             paddingBottom: insets.bottom + extraFooterBottomPadding,
           }}
           renderItem={({ item, index }) => (
-            <Link
-              href={{
-                pathname: "/home/VNView",
-                params: { vnID: item.id },
-              }}
-              key={item.id}
-              style={[
-                styles.cover,
-                (index + 1) % columnCount
-                  ? ((index + 1) % columnCount) - 1
-                    ? {
-                        marginLeft: compensate - compensate / columnCount,
-                      }
-                    : {}
-                  : {
-                      marginLeft: compensate,
-                      // borderColor: "blue",
-                      // borderWidth: 1,
+            <View key={idType == "release" ? item.id : item.info[0]?.id}>
+              {item.info.length == 1 ? (
+                <Link
+                  href={{
+                    pathname:
+                      idType == "release"
+                        ? "/home/sub_page/Release"
+                        : "/home/VNView",
+                    params:
+                      idType == "release"
+                        ? { rID: item.info[0]?.id }
+                        : { vnID: item.info[0]?.id },
+                  }}
+                  style={[
+                    styles.cover,
+                    (index + 1) % columnCount
+                      ? ((index + 1) % columnCount) - 1
+                        ? {
+                            marginLeft: compensate - compensate / columnCount,
+                          }
+                        : {}
+                      : {
+                          marginLeft: compensate,
+                        },
+                    { flex: 1 },
+                    {
+                      width: coverWidth,
+                      // Make this editable with settings in the future
+                      height: item.thumbnail_dims
+                        ? (coverWidth * item.thumbnail_dims[1]) /
+                          item.thumbnail_dims[0]
+                        : coverHeight,
+                      marginBottom: gap,
                     },
-                { flex: 1 },
-                {
-                  width: coverWidth,
-                  height: coverHeight,
-                  marginBottom: gap,
-                },
-              ]}
-              asChild
-            >
-              <Pressable>
-                <Image
-                  style={styles.image}
-                  source={item.image?.url ?? ""}
-                  placeholder={blurhash}
-                  contentFit="cover"
-                  placeholderContentFit="cover"
-                  blurRadius={item.image?.sexual! >= 0.5 ? 100 : 0}
-                  transition={300}
-                />
-                <LinearGradient
-                  colors={colors}
-                  locations={locations}
-                  style={styles.gradient}
-                />
-                <Text
-                  adjustsFontSizeToFit={true}
-                  numberOfLines={2}
-                  style={styles.text}
+                  ]}
+                  asChild
                 >
-                  {item.title}
-                </Text>
-              </Pressable>
-            </Link>
+                  <Pressable>
+                    <Image
+                      style={styles.image}
+                      source={item.url ?? ""}
+                      placeholder={
+                        item.sexual! >= 0.5
+                          ? blurhash
+                          : item.thumbnail ?? blurhash
+                      }
+                      contentFit="cover"
+                      placeholderContentFit="cover"
+                      blurRadius={item.sexual! >= 0.5 ? 100 : 0}
+                      transition={300}
+                    />
+
+                    {renderTitles && (
+                      <LinearGradient
+                        colors={colors}
+                        locations={locations}
+                        style={styles.gradient}
+                      />
+                    )}
+
+                    {renderTitles && (
+                      <Text
+                        adjustsFontSizeToFit={true}
+                        numberOfLines={2}
+                        style={styles.text}
+                      >
+                        {item.info[0]?.title}
+                      </Text>
+                    )}
+                  </Pressable>
+                </Link>
+              ) : (
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger>
+                    <View
+                      style={[
+                        styles.cover,
+                        (index + 1) % columnCount
+                          ? ((index + 1) % columnCount) - 1
+                            ? {
+                                marginLeft:
+                                  compensate - compensate / columnCount,
+                              }
+                            : {}
+                          : {
+                              marginLeft: compensate,
+                            },
+                        { flex: 1 },
+                        {
+                          width: coverWidth,
+                          // Make this editable with settings in the future
+                          height: item.thumbnail_dims
+                            ? (coverWidth * item.thumbnail_dims[1]) /
+                              item.thumbnail_dims[0]
+                            : coverHeight,
+                          marginBottom: gap,
+                        },
+                      ]}
+                    >
+                      <Image
+                        style={styles.image}
+                        source={item.url ?? ""}
+                        placeholder={
+                          item.sexual! >= 0.5
+                            ? blurhash
+                            : item.thumbnail ?? blurhash
+                        }
+                        contentFit="cover"
+                        placeholderContentFit="cover"
+                        blurRadius={item.sexual! >= 0.5 ? 100 : 0}
+                        transition={300}
+                      />
+                    </View>
+                  </DropdownMenu.Trigger>
+                  {/* @ts-expect-error TS2740 */}
+                  <DropdownMenu.Content>
+                    <DropdownMenu.Group>
+                      {item.info.map((info, index) => (
+                        <DropdownMenu.Item
+                          key={index.toString()}
+                          onSelect={() => {
+                            handleNavigation(info);
+                          }}
+                        >
+                          {info.title}
+                        </DropdownMenu.Item>
+                      ))}
+                    </DropdownMenu.Group>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
+              )}
+            </View>
           )}
           estimatedItemSize={coverHeight}
         />
@@ -180,34 +279,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     paddingHorizontal: 10,
-  },
-  pb13: {
-    paddingBottom: 13,
-  },
-  header: {
-    paddingTop: 100 + 13,
-  },
-  outline: {
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 3,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 13,
-  },
-  grow: {
-    flexGrow: 1,
-  },
-  box: {
-    borderRadius: 15,
-    padding: 5,
-    width: 45,
-    height: 45,
-    justifyContent: "center",
-  },
-  boxIcon: {
-    textAlign: "center",
   },
 });

@@ -7,9 +7,12 @@ const FullVNFields = [
     "length_votes",
     "aliases",
     "developers.name",
+    "image.id",
     "image.url",
     "image.sexual",
     "image.violence",
+    "image.thumbnail",
+    "image.thumbnail_dims",
     "tags.id",
     "tags.rating",
     "tags.name",
@@ -25,9 +28,10 @@ const FullVNFields = [
     "relations.title",
 ].join(",");
 
-const CoverVNFields = ["title", "image.url", "image.sexual", "image.violence"].join(
-    ","
-);
+const CoverVNFields = ["title", "image.url", "image.sexual", "image.violence", "image.thumbnail",
+    "image.thumbnail_dims"].join(
+        ","
+    );
 
 const FullReleaseFields = [
     "id",
@@ -57,6 +61,13 @@ const FullReleaseFields = [
     "catalog",
     "extlinks.url",
     "extlinks.label",
+    "images.id",
+    "images.type",
+    "images.url",
+    "images.sexual",
+    "images.violence",
+    "images.thumbnail",
+    "images.thumbnail_dims",
 ].join(",");
 
 

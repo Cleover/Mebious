@@ -8,7 +8,6 @@ import BackNavbar from "@/components/Navbars/BackNavbar";
 import SubViewHeader from "@/components/Headers/SubViewHeader";
 import ReleaseList from "@/components/Lists/ReleaseList";
 
-
 import { useFetchReleaseData } from "@/Functions/FetchUtils";
 
 import { FullReleaseFields } from "@/constants/Fields";
@@ -68,7 +67,7 @@ export default function Releases() {
     };
   }, [vnID]);
 
-  const releasesData = useFetchReleaseData(apiOptions);
+  const releasesData = useFetchReleaseData(apiOptions, true);
 
   const sortedReleasesData = useMemo(() => {
     let selectedSort = sorts.find((sortItem) => sortItem.id === sort);
@@ -187,7 +186,7 @@ export default function Releases() {
   };
 
   return (
-    <Background>
+    <Background className="flex-1">
       <ReleaseList
         releasesData={renderedData}
         setTopBarOpacity={setOpacity}

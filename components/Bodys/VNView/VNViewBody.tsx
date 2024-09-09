@@ -67,11 +67,16 @@ export default function VNViewBody({ vnData }: { vnData: VNDataType }) {
                 vnID: vnData.id,
               },
             },
-            // {
-            //   height: 200,
-            //   title: "Covers",
-            //   moreText: "View All ->",
-            // },
+            {
+              height: 200,
+              title: "Covers",
+              moreText: "View All ->",
+              headerClickNavigation: "/home/sub_page/Covers",
+              moreTextClickNavigation: "/home/sub_page/Covers",
+              linkParams: {
+                vnID: vnData.id,
+              },
+            },
             // {
             //   height: 200,
             //   title: "Characters",
@@ -86,6 +91,11 @@ export default function VNViewBody({ vnData }: { vnData: VNDataType }) {
             //   height: 200,
             //   title: "Quotes",
             //   moreText: "View All ->",
+            //   headerClickNavigation: "/home/sub_page/Quotes",
+            //   moreTextClickNavigation: "/home/sub_page/Quotes",
+            //   linkParams: {
+            //     vnID: vnData.id,
+            //   },
             // },
           ]}
         />

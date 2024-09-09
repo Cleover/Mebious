@@ -7,39 +7,47 @@ import CoverMasonry from "@/components/Masonry/CoverMasonry";
 import BackNavbar from "@/components/Navbars/BackNavbar";
 import TopGradient from "@/components/Gradients/TopGradient";
 
-import { useFetchVisualNovelData } from "@/Functions/FetchUtils";
-import { vnsToCovers } from "@/Functions/ConvertToCovers";
+import { useFetchReleaseData } from "@/Functions/FetchUtils";
+import { releasesToCovers } from "@/Functions/ConvertToCovers";
 
-export default function MoreList() {
+import { FullReleaseFields } from "@/constants/Fields";
+
+export default function Covers() {
   const [opacity, setOpacity] = useState<number>(1);
 
-  const { headerTitle, apiOptions } = useLocalSearchParams();
+  const { vnID } = useLocalSearchParams();
 
-  const parsedApiOptions = useMemo(() => {
-    return JSON.parse(apiOptions as string);
-  }, [apiOptions]);
+  const apiOptions = useMemo(() => {
+    return {
+      filters: ["vn", "=", ["id", "=", vnID]],
+      fields: FullReleaseFields,
+      results: 100,
+    };
+  }, [vnID]);
 
-  const vnData = useFetchVisualNovelData(parsedApiOptions);
+  const releasesData = useFetchReleaseData(apiOptions, true);
 
-  const formattedVnsCovers = vnsToCovers(vnData.data?.results ?? []);
+  const formattedReleaseCovers = releasesToCovers(
+    releasesData.data?.results ?? []
+  );
 
   return (
     <Background className="flex-1">
-      {vnData.loading ? (
+      {releasesData.loading ? (
         <View className="justify-center h-screen">
           <ActivityIndicator size="large" color="#FFFFFF" />
         </View>
       ) : (
-        vnData.data && (
+        releasesData.data && (
           <>
             <CoverMasonry
-              vnsData={formattedVnsCovers}
+              vnsData={formattedReleaseCovers}
               topBarOverwrite={setOpacity}
               extraHeaderTopPadding={35 + 13}
-              header={<Text className="text-4xl font-bold">{headerTitle}</Text>}
+              header={<Text className="text-4xl font-bold">{"Covers"}</Text>}
               footer={
                 <View>
-                  {vnData.data.results.length >= 100 && (
+                  {releasesData.data.results.length >= 100 && (
                     <Text className="self-center">
                       Currently only the first 100 results are shown.
                     </Text>
@@ -47,6 +55,8 @@ export default function MoreList() {
                 </View>
               }
               extraFooterBottomPadding={13}
+              renderTitles={false}
+              idType={"release"}
             />
           </>
         )

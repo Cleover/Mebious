@@ -1,3 +1,5 @@
+import { VNImageType } from "@/Definitions/VNType"
+
 export interface ReleaseResponseType {
     results: ReleaseDataType[],
     more: boolean
@@ -24,7 +26,12 @@ export interface ReleaseDataType {
     producers?: ProducerType[],
     gtin?: string,
     catalog?: string,
-    extlinks?: ExtlinksType[]
+    extlinks?: ExtlinksType[],
+    images?: ReleaseImageType[],
+}
+
+export interface ReleaseImageType extends VNImageType {
+    type: "pkgfront" | "pkgback" | "pkgcontent" | "pkgside" | "pkgmed" | "dig",
 }
 
 export interface LanguageType {

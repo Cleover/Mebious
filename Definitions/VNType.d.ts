@@ -26,9 +26,12 @@ export interface VNDevelopersType {
 }
 
 export interface VNImageType {
+  id?: string,
   url?: string,
   violence?: number,
   sexual?: number
+  thumbnail?: string,
+  thumbnail_dims?: any,
 }
 
 export interface VNTagType {

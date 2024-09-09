@@ -15,6 +15,7 @@ import { CoverVNFields } from "@/constants/Fields";
 
 import type { VNDataType } from "@/Definitions/VNType";
 import type { APIType } from "@/Definitions/APIType";
+import { vnsToCovers } from "@/Functions/ConvertToCovers";
 
 type SortOption = {
   name: string;
@@ -117,10 +118,12 @@ export default function SearchScreen() {
 
   const dataToShow: VNDataType[] = vnData.data?.results ?? [];
 
+  const formattedVnsCovers = vnsToCovers(dataToShow);
+
   return (
-    <Background>
+    <Background className="flex-1">
       <CoverMasonry
-        vnsData={dataToShow}
+        vnsData={formattedVnsCovers}
         columnCount={columnSelection + 1}
         header={
           <View className="gap-4">
