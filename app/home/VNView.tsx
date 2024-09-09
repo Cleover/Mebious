@@ -38,7 +38,7 @@ export default function VNView() {
   const THEME = getTheme();
 
   return (
-    <Background>
+    <Background className="flex-1">
       <Animated.ScrollView
         ref={scrollRef}
         showsVerticalScrollIndicator={false}

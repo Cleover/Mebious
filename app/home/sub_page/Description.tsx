@@ -17,7 +17,7 @@ export default function Description() {
   const [opacity, setOpacity] = useState<number>(1);
 
   return (
-    <Background>
+    <Background className="flex-1">
       <ScrollView
         onScroll={(event) => handleScrollOpacity(event, setOpacity, 50)}
         contentContainerStyle={{ paddingTop: 100 }}

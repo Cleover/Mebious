@@ -56,7 +56,7 @@ export default function HomeScreen() {
     headerState.loading || ratingState.loading || votecountState.loading;
 
   return (
-    <Background>
+    <Background className="flex-1">
       <Animated.ScrollView
         ref={scrollRef}
         showsVerticalScrollIndicator={false}

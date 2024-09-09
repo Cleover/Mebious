@@ -85,7 +85,7 @@ export default function Tags() {
   ];
 
   return (
-    <Background>
+    <Background className="flex-1">
       {!vnData.loading && vnData.data?.results[0] && (
         <ScrollView
           onScroll={(event) => handleScrollOpacity(event, setOpacity, 50)}
