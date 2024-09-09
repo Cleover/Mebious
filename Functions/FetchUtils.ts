@@ -8,19 +8,20 @@ import type { VNResponseType } from "@/Definitions/VNType";
 import type { ReleaseResponseType } from "@/Definitions/ReleaseType";
 
 // Custom hook to fetch visual novel data
-export const useFetchVisualNovelData = (options: APIType) => {
-  return fetchData<VNResponseType>(options, getVisualNovelData);
+export const useFetchVisualNovelData = (options: APIType, fetchAll: boolean = false) => {
+  return fetchData<VNResponseType>(options, getVisualNovelData, fetchAll);
 };
 
 // Custom hook to fetch release data
-export const useFetchReleaseData = (options: APIType) => {
-  return fetchData<ReleaseResponseType>(options, getReleasesData);
+export const useFetchReleaseData = (options: APIType, fetchAll: boolean = false) => {
+  return fetchData<ReleaseResponseType>(options, getReleasesData, fetchAll);
 };
 
 // Generic fetchData function
 export const fetchData = <T,>(
   options: APIType,
-  method: (options: APIType, someFlag: boolean) => Promise<T>
+  method: (options: APIType, fetchAll: boolean) => Promise<T>,
+  fetchAll: boolean
 ) => {
   const [state, setState] = useState<{
     data: T | null;
@@ -33,11 +34,11 @@ export const fetchData = <T,>(
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await method(options, false);
+        const data = await method(options, fetchAll);
         setState({ data, loading: false });
       } catch (error) {
         console.error(`Error fetching data:`, error);
-        setState({ data: null, loading: false });
+        setState({ data: null, loading: fetchAll });
       }
     };
 

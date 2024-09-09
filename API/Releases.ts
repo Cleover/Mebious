@@ -8,7 +8,7 @@ import type { APIType } from '@/Definitions/APIType';
 
 export async function getReleasesData(
     { filters, fields, sort, reverse, results, page = 1 }: APIType,
-    fetchAll: boolean = false
+    fetchAll: boolean
 ): Promise<ReleaseResponseType> {
     try {
         const requestData = Object.fromEntries(
